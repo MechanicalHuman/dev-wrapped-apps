@@ -1,11 +1,28 @@
 #!/bin/bash
 
-rm -rf ./out
-mkdir -p ./out
+DEST="./apps"
+ARCH="-darwin-x64"
 
-nativefier --name Azure --icon ./icons/azure.png --electron-version 1.6.6 --inject ./inject/disablefocus.css --single-instance --disable-dev-tools --disable-context-menu https://portal.azure.com
-nativefier --name Trello --electron-version 1.6.6 --inject ./inject/disablefocus.css --single-instance --disable-dev-tools --disable-context-menu https://trello.com
-nativefier --name GistBox --icon ./icons/github.png --electron-version 1.6.6 --single-instance --disable-dev-tools --disable-context-menu https://app.gistboxapp.com
-nativefier --name DevDocs --icon ./icons/devdocs.png --electron-version 1.6.6 --single-instance --disable-dev-tools --disable-context-menu http://devdocs.io
-nativefier --name RegEx --icon ./icons/regex101.png --electron-version 1.6.6 --single-instance --disable-dev-tools --disable-context-menu https://regex101.com
-nativefier --name 'Facebook Messenger' --icon ./icons/messenger.icns --counter --electron-version 1.6.6 --inject ./inject/disablefocus.css --disable-dev-tools --single-instance --user-agent 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/603.2.1 (KHTML, like Gecko) Version/10.1.1 Safari/603.2.1' https://www.messenger.com
+function wrap_app(){
+
+    if [ "$3" = "--icon" ] && [ ! -z "$4" ]; then
+        nativefier --name "$1" --single-instance --disable-dev-tools --disable-context-menu --full-screen --inject ./inject/disablefocus.css --icon "$4" "$2" "$DEST"
+    else
+        nativefier --name "$1" --single-instance --disable-dev-tools --disable-context-menu --full-screen --inject ./inject/disablefocus.css "$2" "$DEST"
+    fi
+
+    mkdir -p "$DEST"
+    rm -rf "/Applications/$1.app"
+    mv -f -v "$DEST/$1$ARCH/$1.app" "/Applications/$1.app"
+    open -a "/Applications/$1.app"
+    rm -rf "$DEST"
+}
+
+# wrap_app 'Asana' https://app.asana.com
+# wrap_app 'Amazon Web Services' https://console.aws.amazon.com --icon aws.png
+# wrap_app 'Azure' https://portal.azure.com --icon azure.png
+# wrap_app 'DevDocs'  https://devdocs.io --icon devdocs.png
+# wrap_app 'RegEx' https://regex101.com --icon regex101.png
+# wrap_app "Facebook Messenger" https://www.messenger.com --icon messenger.icns
+# wrap_app 'Keymetrics' https://app.keymetrics.io --icon keymetrics.png
+
